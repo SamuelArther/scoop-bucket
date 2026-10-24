@@ -21,7 +21,7 @@ jobs:
       bumped: ${{ steps.bump.outputs.bumped }}
       version: ${{ steps.bump.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Check for a new release
         id: bump
         env:
