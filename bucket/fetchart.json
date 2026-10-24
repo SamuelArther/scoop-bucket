@@ -1,10 +1,10 @@
 {
-    "version": "1.5.0",
+    "version": "1.6.0",
     "description": "Download game art, achievements, posters, album covers and more from the command line",
     "homepage": "https://github.com/SamuelArther/fetchart",
     "license": "MIT",
-    "url": "https://github.com/SamuelArther/fetchart/releases/download/v1.5.0/fetchart-windows.exe",
-    "hash": "0782758399782cd548e2987ec326920aae6f756eff5c9690a8ee305a7a6c349f",
+    "url": "https://github.com/SamuelArther/fetchart/releases/download/v1.6.0/fetchart-windows.exe",
+    "hash": "ae5b1660ac687b5f1a78afea0d047739f03909a3ff1c34a8f580c9596f573a99",
     "bin": [
         [
             "fetchart-windows.exe",
