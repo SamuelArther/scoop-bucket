@@ -1,0 +1,44 @@
+name: Bump
+
+# Checks for a new fetchart release and updates bucket/fetchart.json once the
+# GitHub release exe is published.
+on:
+  schedule:
+    - cron: "41 */4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bump
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    outputs:
+      bumped: ${{ steps.bump.outputs.bumped }}
+      version: ${{ steps.bump.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for a new release
+        id: bump
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/bump.py bucket/fetchart.json
+      - name: Commit and push
+        if: steps.bump.outputs.bumped == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bucket/fetchart.json
+          git commit -m "fetchart: Update to version ${{ steps.bump.outputs.version }}"
+          git push
+
+  test:
+    needs: bump
+    if: needs.bump.outputs.bumped == 'true'
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ github.ref_name }}

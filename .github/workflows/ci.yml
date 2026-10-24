@@ -1,0 +1,53 @@
+name: CI
+
+# Installs every app from this checkout with real Scoop on Windows.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  # Called by bump.yml after an automatic bump (pushes made with GITHUB_TOKEN don't trigger push events).
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to test
+        type: string
+        default: ""
+
+jobs:
+  install:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+      - name: Install Scoop
+        shell: pwsh
+        run: |
+          iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
+          "$env:USERPROFILE\scoop\shims" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+      - name: Add this bucket from the checkout
+        shell: pwsh
+        run: |
+          # Scoop clones the bucket, so give the checkout a branch to clone.
+          git switch -C ci
+          $url = 'file:///' + ($env:GITHUB_WORKSPACE -replace '\', '/')
+          scoop bucket add samuelarther $url
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          scoop bucket list
+      - name: Install fetchart
+        shell: pwsh
+        run: |
+          scoop install fetchart
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          scoop list
+      - name: Run fetchart
+        shell: pwsh
+        run: |
+          $expected = (Get-Content bucket/fetchart.json -Raw | ConvertFrom-Json).version
+          $out = (fetchart --version) -join "`n"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          Write-Output $out
+          if ($out -notmatch [regex]::Escape($expected)) { throw "expected version $expected, got: $out" }
+          (Get-Command fetchart).Source
