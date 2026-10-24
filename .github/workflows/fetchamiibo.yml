@@ -1,0 +1,60 @@
+name: fetchamiibo
+
+# Keeps bucket/fetchamiibo.json on the latest release (Scoop's own checkver + autoupdate) and installs it
+# with real Scoop on Windows whenever the manifest changes.
+on:
+  push:
+    branches: [main]
+    paths: [bucket/fetchamiibo.json, .github/workflows/fetchamiibo.yml]
+  pull_request:
+    paths: [bucket/fetchamiibo.json, .github/workflows/fetchamiibo.yml]
+  schedule:
+    - cron: "53 */4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fetchamiibo
+  cancel-in-progress: false
+
+jobs:
+  update-and-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Scoop
+        shell: pwsh
+        run: |
+          iex "& {$(irm get.scoop.sh)} -RunAsAdmin"
+          "$env:USERPROFILE\scoop\shims" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+      - name: Update to the latest release
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        run: |
+          & "$env:USERPROFILE\scoop\apps\scoop\current\bin\checkver.ps1" -App fetchamiibo -Dir bucket -Update
+      - name: Install from this checkout
+        shell: pwsh
+        run: |
+          scoop install bucket/fetchamiibo.json
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $expected = (Get-Content bucket/fetchamiibo.json -Raw | ConvertFrom-Json).version
+          $out = (fetchamiibo --version) -join "`n"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          Write-Output $out
+          if ($out -notmatch [regex]::Escape($expected)) { throw "expected version $expected, got: $out" }
+          fetchamiibo --list | Select-String -SimpleMatch "Isabelle" | Select-Object -First 1
+      - name: Commit an update
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        run: |
+          git diff --quiet -- bucket/fetchamiibo.json
+          if (-not $LASTEXITCODE) { exit 0 }
+          $version = (Get-Content bucket/fetchamiibo.json -Raw | ConvertFrom-Json).version
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bucket/fetchamiibo.json
+          git commit -m "fetchamiibo: Update to version $version"
+          git pull --rebase
+          git push

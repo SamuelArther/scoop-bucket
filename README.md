@@ -10,5 +10,6 @@ scoop install samuelarther/fetchart
 | App | What it is |
 |---|---|
 | [fetchart](https://github.com/SamuelArther/fetchart) | Download game art, achievements, posters, album covers and more from the command line |
+| [fetchamiibo](https://github.com/SamuelArther/fetchamiibo) | Download amiibo NFC dumps for a Flipper Zero, by name or by game and letter (`scoop install samuelarther/fetchamiibo`) |
 
 Manifests are bumped automatically: `.github/workflows/bump.yml` checks for a new release every few hours, `scripts/bump.py` rewrites the manifest, and `.github/workflows/ci.yml` installs it with Scoop on Windows.

@@ -1,0 +1,20 @@
+{
+    "version": "1.1.0",
+    "description": "Download amiibo NFC dumps for a Flipper Zero, by name or by game and letter",
+    "homepage": "https://github.com/SamuelArther/fetchamiibo",
+    "license": "MIT",
+    "url": "https://github.com/SamuelArther/fetchamiibo/releases/download/v1.1.0/fetchamiibo-windows.exe",
+    "hash": "aeee14839eea261ed3744953d4289dddfb6f722ff638b7eddd11430aacad031b",
+    "bin": [
+        [
+            "fetchamiibo-windows.exe",
+            "fetchamiibo"
+        ]
+    ],
+    "checkver": {
+        "github": "https://github.com/SamuelArther/fetchamiibo"
+    },
+    "autoupdate": {
+        "url": "https://github.com/SamuelArther/fetchamiibo/releases/download/v$version/fetchamiibo-windows.exe"
+    }
+}
