@@ -32,7 +32,7 @@ jobs:
         run: |
           # Scoop clones the bucket, so give the checkout a branch to clone.
           git switch -C ci
-          $url = 'file:///' + ($env:GITHUB_WORKSPACE -replace '\', '/')
+          $url = 'file:///' + $env:GITHUB_WORKSPACE.Replace([char]92, [char]47)
           scoop bucket add samuelarther $url
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           scoop bucket list
