@@ -37,7 +37,7 @@ jobs:
       - name: Install from this checkout
         shell: pwsh
         run: |
-          scoop install bucket/fetchamiibo.json
+          scoop install "$PWD/bucket/fetchamiibo.json"
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           $expected = (Get-Content bucket/fetchamiibo.json -Raw | ConvertFrom-Json).version
           $out = (fetchamiibo --version) -join "`n"
